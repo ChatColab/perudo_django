@@ -1,0 +1,33 @@
+{% load static%}
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Room</title>
+    <link rel="stylesheet" href="{% static 'room/style.css' %}">
+</head>
+<body>
+    {% include 'chatrooms/nav.html'%}
+    <a class="leaveButton" href="{% url 'index' %}">Leave</a>
+
+    <div class="container">
+        <div id="chat-log">
+            {% for chat in chats.all %}
+                {% if chat.user.id == request.user.id%}
+                    <div class="message sender">
+                     {{chat.user.username}}:  {{chat.content}}
+                    </div>
+                {%else %}
+                    <div class="message receiver">
+                        {{chat.user.username}}: {{chat.content}}
+                    </div>
+                    {%endif%}
+            {% endfor%}
+        </div>
+        <input id="chat-message-input" type="text" size="35"><br>
+        <input id="chat-message-submit" type="button" value="Send">
+        {{ room_name|json_script:"room-name" }}
+    </div>
+    {{ request.user.id|json_script:"user_id" }}
+    <script src="{% static 'room/room.js' %}"></script>
+</body>
+</html>
