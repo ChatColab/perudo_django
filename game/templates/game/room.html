@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perudo</title>
+</head>
+<body>
+    <header>
+        <h1>Perudo</h1>
+    </header>
+    <footer>
+        <p>&copy; Copyright 2017</p>
+    </footer>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="rules.html">Rules</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+    <div id ="actions">
+        <div class="numbers">
+            <div class="n1 n">
+                <button id="upn1">&#x25B2;</button>
+                <p id="n1value">0</p>
+                <button id="downn1">&#x25BC;</button>
+            </div>
+            <div class="dice">
+                <div class="diceTop dicePart">
+                    <button id="dicePaco">ඞ</button>
+                    <button id="dice2">2</button>
+                    <button id="dice3">3</button>
+                </div>
+                <div class="diceBottom dicePart">
+                    <button id="dice4">4</button>
+                    <button id="dice5">5</button>
+                    <button id="dice6">6</button>
+                </div>
+            </div>
+        </div>
+        <div class="calls">
+            <button id="dudoButton" type="button">Dudo !</button>
+            <button id="calzaButton" type="button">Calza !</button>
+            <button id="validButton" type="button">Valider</button>
+        </div>
+    </div>
+</body>
+<script src={%static 'game/room.js'%}></script>
+</html>

@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-33fbkfa4d4wrbetb#45y5efpu@dl_kpk!kxfp7$_*k@svc5vxz
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '9df3-194-57-109-66.ngrok.io',
+    '5fb5-77-130-108-58.ngrok.io',
     'localhost',
     '127.0.0.1'
 ]
@@ -42,6 +42,7 @@ AUTHENTICATION_BACKENDS = (
 INSTALLED_APPS = [
     'channels',
     'chatrooms',
+    'game',
 
     'allauth',
     'allauth.account',
