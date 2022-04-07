@@ -12,7 +12,6 @@ class Game(models.Model):
     dice3 = models.IntegerField(default=0)
     dice4 = models.IntegerField(default=0)
     dice5 = models.IntegerField(default=0)
-    palifico = models.IntegerField(default=0)
     ready = models.BooleanField(default=False)
 
 class GameRoom(models.Model):
@@ -22,4 +21,5 @@ class GameState(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     nbdice = models.IntegerField(default=0)
     valuedice = models.IntegerField(default=0)
-
+    turn = models.IntegerField(default=0)
+    turn1 = models.BooleanField(default=False)

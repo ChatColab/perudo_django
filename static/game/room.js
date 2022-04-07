@@ -11,10 +11,17 @@ dice4 = document.getElementById("dice4");
 dice5 = document.getElementById("dice5");
 dice6 = document.getElementById("dice6");
 n1val = document.getElementById("n1value");
+ready = document.getElementById("ready");
 const loggeduser_id = document.getElementById("user_id").value;
-var connectionString =
-  "ws://" + window.location.host + "/ws/game/" + roomCode + "/";
-var gameSocket = new WebSocket(connectionString);
+let roomName = document.getElementById("game-name").innerHTML
+// delete all the quote of the variable roomName
+roomName = roomName.replace(/['"]+/g, '');
+
+
+
+const gameSocket = new WebSocket(
+  "ws://" + window.location.host + "/ws/game/" + roomName + "/"
+);
 
 n1 = 1;
 n2 = 0;
@@ -105,12 +112,17 @@ rollAll = () => {
   console.log("Dés lancés");
 };
 
-resetCall = () => {
+resetCall = (n) => {
   //reset all the values
-  n1 = 1;
-  n2 = 0;
-  turn1 = true;
-  rollAll();
+  let data = {
+    'event': 'RESET-CALL',
+    'user': playersList[turn].userid,
+    'game_data': {
+      'winner': n,
+      'nb_players': playersList.length-1
+    }
+  };
+  gameSocket.send(JSON.stringify(data));
 };
 
 prev = () => {
@@ -123,18 +135,10 @@ prev = () => {
 };
 
 newTurn = () => {
-  n1tmp = n1;
-  n1val.innerHTML = n1tmp;
-  n2tmp = n2;
+  
   pacoTurn = false;
   numberTurn = false;
   console.log("Nouveau tour");
-  if (turn >= playersList.length) {
-    turn = 0;
-  }
-  if (turn < 0) {
-    turn = playersList.length - 1;
-  }
   //check if there is a looser
   if (playersList[turn].numberOfDie== 0) {
     eliminate(playersList[turn]);
@@ -164,14 +168,11 @@ dudoButton.addEventListener("click", () => {
     if (res >= n1) {
       console.log(playersList[turn].getName() + " perd un dé! GROS CHEH!");
       playersList[turn].loseDie();
-      resetCall();
-      newTurn();
+      resetCall(true);
     } else {
       console.log(prev().getName() + " perd un dé! GROS CHEH!");
       prev().loseDie();
-      turn--;
-      resetCall();
-      newTurn();
+      resetCall(false);
     }
   }
 });
@@ -184,13 +185,11 @@ calzaButton.addEventListener("click", () => {
     if (res == n1) {
       console.log(playersList[turn].getName() + " gagne un dé quel BG wow !");
       playersList[turn].addDie();
-      resetCall();
-      newTurn();
+      resetCall(true);
     } else {
       console.log(playersList[turn].getName() + " perd un dé! GROS CHEH!");
       playersList[turn].loseDie();
-      resetCall();
-      newTurn();
+      resetCall(true);
     }
   }
 });
@@ -203,16 +202,18 @@ validButton.addEventListener("click", () => {
   ) {
     turn1 = false;
     turn++;
+    console.log("validé (turn++) : " + turn);
     let data = {
       'event': 'VALID',
       'game_data': {
-        ''
+        'nb_dice': n1tmp,
+        'value_dice': n2tmp,
+        'turn': turn+1,
+        'nb_players': playersList.length-1
+      },
+      'user': playersList[turn].userid
       }
-      }
-    n1 = n1tmp;
-    n2 = n2tmp;
-    console.log("validé (turn++) : " + turn);
-    newTurn();
+    gameSocket.send(JSON.stringify(data));
   }
 });
 
@@ -412,6 +413,15 @@ dice6.addEventListener("click", () => {
   }
 });
 
+ready.addEventListener("click", () => {
+  let data = {
+    'event': 'READY',
+    'user': loggeduser_id,
+    'game_data': {}
+  }
+  gameSocket.send(JSON.stringify(data));
+});
+
 
 
 
@@ -445,23 +455,26 @@ gameSocket.onmessage = function (e) {
         playersList[who].nbDice = nbdice;
       }
       
-
-
-    case "NEWTURN":
-      player.numberOfDie = data["numberOfDie"];
-      player.dieList = data["dieList"];
-      player.palifico = data["palifico"];
-    case "END":
-      alert(message);
-      reset();
       break;
-    case "MOVE":
-      if (message["player"] != char_choice) {
-        make_move(message["index"], message["player"]);
-        myturn = true;
-        document.getElementById("alert_move").style.display = "inline";
-      }
+
+    case "VALID":
+      n1tmp= n1 = message["nb_dice"];
+      n2tmp=n2 = message["value_dice"];
+      n1val.innerHTML = n1tmp;
+      turn = message["turn"];
+      newTurn();
       break;
+    
+    case "RESET-ALL":
+      n1tmp= n1 = message["nb_dice"];
+      n2tmp=n2 = message["value_dice"];
+      n1val.innerHTML = n1tmp;
+      turn = message["turn"];
+      turn1 = message["turn1"];
+      roll();
+      newTurn();
+      break;
+    
     default:
       console.log("No event");
   }
