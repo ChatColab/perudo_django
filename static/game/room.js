@@ -11,6 +11,7 @@ dice4 = document.getElementById("dice4");
 dice5 = document.getElementById("dice5");
 dice6 = document.getElementById("dice6");
 n1val = document.getElementById("n1value");
+const loggeduser_id = document.getElementById("user_id").value;
 var connectionString =
   "ws://" + window.location.host + "/ws/game/" + roomCode + "/";
 var gameSocket = new WebSocket(connectionString);
@@ -22,21 +23,23 @@ turn1 = true;
 palifico = false;
 
 class Player {
-  constructor(name) {
+  constructor(name, userid) {
     this.alreadyPalifico = false;
     this.name = name;
+    this.userid = userid;
     this.dieList = [];
     this.numberOfDie = 5;
   }
-  roll() {
+  roll(n) {
     //clear the dieList
     this.dieList = [];
 
     let data = {
       'event': 'ROLL',
-      'user': this.name,
+      'user': this.userid,
       'game_data': {
-        'nb_dice': this.numberOfDie
+        'nb_dice': this.numberOfDie,
+        'who': n,
       }
     };
     gameSocket.send(JSON.stringify(data));
@@ -97,7 +100,7 @@ countDice = (n) => {
 
 rollAll = () => {
   for (let i = 0; i < playersList.length; i++) {
-    playersList[i].roll();
+    playersList[i].roll(i);
   }
   console.log("Dés lancés");
 };
@@ -133,7 +136,7 @@ newTurn = () => {
     turn = playersList.length - 1;
   }
   //check if there is a looser
-  if (playersList[turn].getDieList().length == 0) {
+  if (playersList[turn].numberOfDie== 0) {
     eliminate(playersList[turn]);
   }
   //check if there is a winner
@@ -200,6 +203,12 @@ validButton.addEventListener("click", () => {
   ) {
     turn1 = false;
     turn++;
+    let data = {
+      'event': 'VALID',
+      'game_data': {
+        ''
+      }
+      }
     n1 = n1tmp;
     n2 = n2tmp;
     console.log("validé (turn++) : " + turn);
@@ -405,6 +414,7 @@ dice6.addEventListener("click", () => {
 
 
 
+
 gameSocket.onmessage = function (e) {
   let data = JSON.parse(e.data);
   data = data["payload"];
@@ -415,15 +425,28 @@ gameSocket.onmessage = function (e) {
       let nbplayer = message["nb_players"];
 
       let playersList = message["players"];
-
+      let userlist = message["userlist"];
       for (let i = 0; i < nbplayer; i++) {
         let name = playersList[i];
-        playersList.push(new Player(name));
+        let userid = userlist[i];
+        playersList.push(new Player(name,userid));
       }
         rollAll();
         newTurn();
         break;
     
+    case "ROLL":
+      let user = message["user"];
+      if (loggeduser_id = user) {
+        let dice = message["dice"];
+        let nbdice= message["nb_dice"];
+        let who = message["who"];
+        playersList[who].dice = dice;
+        playersList[who].nbDice = nbdice;
+      }
+      
+
+
     case "NEWTURN":
       player.numberOfDie = data["numberOfDie"];
       player.dieList = data["dieList"];

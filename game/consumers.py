@@ -54,15 +54,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			if(len(ready_games) == len(games)):
 				# take the name of all the players in the room and send them to the game
 				players = []
+				userlist = []
 				for player_name in games:
 					players.append(player_name.user.username)
+					userlist.append(player_name.user)
 
 				await self.channel_layer.group_send(
                     self.room_group_name, {
                         'type': 'send_message',
                         'game_data': {
                         	'nb_players': len(players),
-                            'players': players
+                            'players': players,
+							'userlist': userlist
                         },
                         'event': "START"
                     })
@@ -75,11 +78,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 		elif(event == 'ROLL'):
 			nbdice = game_data_json['nb_dice']
+			dicelist = []
+			who = game_data_json['who']
 			for i in range(1,nbdice+1):
 				rdm = random.randint(1,6)
+				dicelist.append(rdm)
 				dice="dice"+str(i)
 				game.dice = rdm
 			await database_sync_to_async(game.save)()
+			await self.channel_layer.group_send(
+					self.room_group_name, {
+						'type': 'send_message',
+						'game_data': {
+							'user': user,
+							'dicelist': dicelist,
+							'nb_dice': nbdice,
+							'who': who
+						},
+						'event': "ROLL"
+					})
+
+
 
 
 
